@@ -1,17 +1,19 @@
-import classes from './MainNavigation.module.css';
+import Link from "next/link";
+import classes from "./MainNavigation.module.css";
 
 function MainNavigation() {
-
   return (
     <header className={classes.header}>
       <div className={classes.logo}>React Meetups</div>
       <nav>
         <ul>
           <li>
-            <Link to='/'>All Meetups</Link>
+            {/* to prop should be changed to href because the link component offered
+             by NextJS wants this href prop where we define the destination of that link. */}
+            <Link href="/">All Meetups</Link>
           </li>
           <li>
-            <Link to='/new-meetup'>Add New Meetup</Link>
+            <Link href="/new-meetup">Add New Meetup</Link>
           </li>
         </ul>
       </nav>
