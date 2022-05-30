@@ -38,6 +38,13 @@ export async function getStaticProps() {
     props: {
       meetups: DUMMY_MEETUPS
     },
+    // When we add this property to the object returned by getStaticProps, we unlock a feature called incremental Static Generation.
+    // Revalidate wants a number, let's say 10, and this number is the number of seconds NextJS will wait until it regenerates this page
+    // for an incoming request. That means that with revalidate set to some number, this page will not just be generated during the build process.
+    // It will be generated there but not just but it will also be generated every couple of seconds on the server, at least if there are requests
+    // for this page. So that means that this page, with revalidate set to 10 would be regenerated on the server at least every 10 seconds if there are requests coming in
+    // for this page. And then these regenerated pages would replace the old pre-generated pages.
+    revalidate: 10 
   };
 }
 
