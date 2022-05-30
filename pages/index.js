@@ -23,6 +23,37 @@ const HomePage = (props) => {
   return <MeetupList meetups={props.meetups} />;
 };
 
+// getServerSideProps will now not run during the build process, but instead always on the server after deployment.
+// This getServerSideProps function runs for every incoming requests.
+// Now, which one of the two should you use? Is getServerSideProps better or getStaticProps?
+// getServerSideProps might sound better because it's guaranteed to run for every request.
+// But that actually can be a disadvantage, because that means that you need to wait for your page to be generated on every incoming request.
+// Now if you don't have data that changes all the time, and with that, I really mean that it changes multiple times every second.
+// And if you don't need access to the request object, let's say for authentication, getStaticProps is actually better.
+// Because there you pre-generate an HTML file, that file can then be stored and server by a CDN. And that simply is faster than regenerating
+// and fetching that data for every incoming request. So your page will be faster when working with getStaticProps, because then it can be cached
+// and reused, instead of regenerated all the time. Hence, you should really only use getServerSideProps if you need access to that concrete request object,
+// because you don't have access to request and response in getStaticProps or if you really have data that changes multiple times every second,
+// then therefore even 'revalidate' won't help you, then getServerSideProps is a great choice.
+
+// export async function getServerSideProps(context) {
+
+  // there in this context parameter, you also get access to the request object under the req key, and the response object
+  // that will be sent back (just for example, here we return object with the props key, but you might also work with context
+  // in different cases because you have access to the body, headers of response and etc.)
+
+  // const req = context.req;
+  // const res = context.res;
+
+  // Any code you write in here will always run on the server, never in the client.
+
+//   return {
+//     props: {
+//       meetups: DUMMY_MEETUPS,
+//     },
+//   };
+// }
+
 export async function getStaticProps() {
   // any code you write in here will never end up on the client side and it will never execute on the client side
   // simply because this code is executed during the build process, not on the server and especially not on the clients
@@ -44,7 +75,7 @@ export async function getStaticProps() {
     // It will be generated there but not just but it will also be generated every couple of seconds on the server, at least if there are requests
     // for this page. So that means that this page, with revalidate set to 10 would be regenerated on the server at least every 10 seconds if there are requests coming in
     // for this page. And then these regenerated pages would replace the old pre-generated pages.
-    revalidate: 10 
+    revalidate: 10
   };
 }
 
