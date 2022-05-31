@@ -20,7 +20,7 @@ async function handler(req, res) {
     const db = client.db();
 
     // you get hold of a collection by using your database db and then the collection method.
-    const meetupsCollection = db.collection("meetups-collection");
+    const meetupsCollection = db.collection("meetups");
 
     // insertOne is one of the built-in query commands for inserting one new document into this collection.
     const result = await meetupsCollection.insertOne(data);

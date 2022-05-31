@@ -1,23 +1,5 @@
+import { MongoClient } from "mongodb";
 import MeetupList from "../components/meetups/MeetupList";
-
-const DUMMY_MEETUPS = [
-  {
-    id: "m1",
-    title: "A First Meetup",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-    address: "Some address 5, 12345 Some City",
-    description: "This is a first meetup!",
-  },
-  {
-    id: "m2",
-    title: "A Second Meetup",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-    address: "Some address 10, 12345 Some City",
-    description: "This is a second meetup!",
-  },
-];
 
 const HomePage = (props) => {
   return <MeetupList meetups={props.meetups} />;
@@ -38,14 +20,14 @@ const HomePage = (props) => {
 
 // export async function getServerSideProps(context) {
 
-  // there in this context parameter, you also get access to the request object under the req key, and the response object
-  // that will be sent back (just for example, here we return object with the props key, but you might also work with context
-  // in different cases because you have access to the body, headers of response and etc.)
+// there in this context parameter, you also get access to the request object under the req key, and the response object
+// that will be sent back (just for example, here we return object with the props key, but you might also work with context
+// in different cases because you have access to the body, headers of response and etc.)
 
-  // const req = context.req;
-  // const res = context.res;
+// const req = context.req;
+// const res = context.res;
 
-  // Any code you write in here will always run on the server, never in the client.
+// Any code you write in here will always run on the server, never in the client.
 
 //   return {
 //     props: {
@@ -64,10 +46,31 @@ export async function getStaticProps() {
   // So now this is pre-rendered and it now contains the full HTML code and that's, of course, also great for search engines then
   // because now, data is not fetched in a second component render cycle on the client but initially, before this page is pre-rendered,
   // during the build process. And that's a great plus and one of the main features of NextJS, this data fetching for pre-rendering.
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://vladimirs:vovan2001@cluster0.1nvkxcj.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // db to get hold of that database to which we're connecting here (meetups in the URL)
+  const db = client.db();
+
+  // you get hold of a collection by using your database db and then the collection method.
+  const meetupsCollection = db.collection("meetups");
+
+  const meetups = await meetupsCollection.find().toArray();
+
+  client.close();
+
   return {
     // DUMMY_MEETUPS would be loaded and prepared in getStaticProps and then they would be set as props for this page component.
     props: {
-      meetups: DUMMY_MEETUPS
+      meetups: meetups.map((meetup) => ({
+         title: meetup.title,
+         address: meetup.address,
+         image: meetup.image,
+         // we should to convert _id which is object on MondoDB to string
+         id: meetup._id.toString(),
+      }))
     },
     // When we add this property to the object returned by getStaticProps, we unlock a feature called incremental Static Generation.
     // Revalidate wants a number, let's say 10, and this number is the number of seconds NextJS will wait until it regenerates this page
@@ -75,7 +78,7 @@ export async function getStaticProps() {
     // It will be generated there but not just but it will also be generated every couple of seconds on the server, at least if there are requests
     // for this page. So that means that this page, with revalidate set to 10 would be regenerated on the server at least every 10 seconds if there are requests coming in
     // for this page. And then these regenerated pages would replace the old pre-generated pages.
-    revalidate: 10
+    revalidate: 1,
   };
 }
 
