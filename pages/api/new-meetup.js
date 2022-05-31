@@ -16,10 +16,13 @@ async function handler(req, res) {
       "mongodb+srv://vladimirs:vovan2001@cluster0.1nvkxcj.mongodb.net/meetups?retryWrites=true&w=majority"
     );
 
+    // db to get hold of that database to which we're connecting here (meetups in the URL)
     const db = client.db();
 
+    // you get hold of a collection by using your database db and then the collection method.
     const meetupsCollection = db.collection("meetups-collection");
 
+    // insertOne is one of the built-in query commands for inserting one new document into this collection.
     const result = await meetupsCollection.insertOne(data);
 
     console.log(result);
