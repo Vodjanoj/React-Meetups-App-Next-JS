@@ -1,17 +1,33 @@
+import { MongoClient, ObjectId } from "mongodb";
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
-const MeetupDetails = () => {
+const MeetupDetails = (props) => {
   return (
     <MeetupDetail
-      image="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg"
-      title="A First Meetup"
-      address="Some Street 5, Some City"
-      description="The meetup description"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 };
 
 export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://vladimirs:vovan2001@cluster0.1nvkxcj.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // db to get hold of that database to which we're connecting here (meetups in the URL)
+  const db = client.db();
+
+  // you get hold of a collection by using your database db and then the collection method.
+  const meetupsCollection = db.collection("meetups");
+
+  // first {} means give me all the objects
+  const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
   return {
     // This key (fallback) tells NextJS whether your paths array contains all supported parameter values
     // or just some of them. If you set fall back to false, you say that your paths contains all supported meetup ID values.
@@ -19,21 +35,11 @@ export async function getStaticPaths() {
     // If you set fall back to true on the other hand, NextJS would try to generate a page for this meetup ID dynamically on the server
     // for the incoming request.
     fallback: false,
-    paths: [
-      {
-        params: {
-          meetupId: "m1",
-        },
-      },
-      {
-        params: {
-          meetupId: "m2",
-        },
-      },
-    ],
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
-
 
 export async function getStaticProps(context) {
   // fetch data for a single meetup
@@ -41,16 +47,32 @@ export async function getStaticProps(context) {
   // and that will be an object where our identifiers between the square brackets ([meetupId]) will be properties and the values will be the actual values
   // encoded in the URL. And that would then be the concrete meetup ID for which we're displaying this meetup.
   const meetupId = context.params.meetupId;
-  console.log(meetupId);
+
+  const client = await MongoClient.connect(
+    "mongodb+srv://vladimirs:vovan2001@cluster0.1nvkxcj.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+
+  // db to get hold of that database to which we're connecting here (meetups in the URL)
+  const db = client.db();
+
+  // you get hold of a collection by using your database db and then the collection method.
+  const meetupsCollection = db.collection("meetups");
+
+  // ObjectId convert string into such a ObjectId object.
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: ObjectId(meetupId),
+  });
+
+  client.close();
+
   return {
     props: {
       meetupData: {
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-        id: meetupId,
-        title: "First Meetup",
-        address: "Some Street 5, Some City",
-        description: "The meetup description",
+        id: selectedMeetup._id.toString(),
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        image: selectedMeetup.image,
+        description: selectedMeetup.description,
       },
     },
   };
