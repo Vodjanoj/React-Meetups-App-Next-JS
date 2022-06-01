@@ -1,8 +1,21 @@
+import { Fragment } from "react/cjs/react.production.min";
+import Head from "next/head";
 import { MongoClient } from "mongodb";
 import MeetupList from "../components/meetups/MeetupList";
 
 const HomePage = (props) => {
-  return <MeetupList meetups={props.meetups} />;
+  return (
+    <Fragment>
+      <Head>
+        <title>React Meetups</title>
+        <meta
+          name="description"
+          content="Browse a huge list of highly active React meetups"
+        ></meta>
+      </Head>
+      <MeetupList meetups={props.meetups} />
+    </Fragment>
+  );
 };
 
 // getServerSideProps will now not run during the build process, but instead always on the server after deployment.
@@ -65,12 +78,12 @@ export async function getStaticProps() {
     // DUMMY_MEETUPS would be loaded and prepared in getStaticProps and then they would be set as props for this page component.
     props: {
       meetups: meetups.map((meetup) => ({
-         title: meetup.title,
-         address: meetup.address,
-         image: meetup.image,
-         // we should to convert _id which is object on MondoDB to string
-         id: meetup._id.toString(),
-      }))
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        // we should to convert _id which is object on MondoDB to string
+        id: meetup._id.toString(),
+      })),
     },
     // When we add this property to the object returned by getStaticProps, we unlock a feature called incremental Static Generation.
     // Revalidate wants a number, let's say 10, and this number is the number of seconds NextJS will wait until it regenerates this page
@@ -78,7 +91,7 @@ export async function getStaticProps() {
     // It will be generated there but not just but it will also be generated every couple of seconds on the server, at least if there are requests
     // for this page. So that means that this page, with revalidate set to 10 would be regenerated on the server at least every 10 seconds if there are requests coming in
     // for this page. And then these regenerated pages would replace the old pre-generated pages.
-    revalidate: 1,
+    revalidate: 10,
   };
 }
 
