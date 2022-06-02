@@ -45,7 +45,14 @@ export async function getStaticPaths() {
     // That means that if the user enters anything that's not supported here, for example, M3 he or she would see a 404 error.
     // If you set fall back to true on the other hand, NextJS would try to generate a page for this meetup ID dynamically on the server
     // for the incoming request.
-    fallback: false,
+
+    // When you set fallback to true or to blocking, you're telling NextJS that the list of paths which you're specifying here, might not be exhaustive.
+    // And, therefore, when fallback is set to true or to blocking NextJS will not respond with a 404 page if it can't find the page immediately.
+    // Instead with fallback set to true or blocking, it will then generate that page on demand and thereafter cache it, so it will pre-generate it when needed.
+    // Now the difference between true and blocking then is that, with true, it would immediately return an empty page, and then pull down the dynamically generated content once that's done.
+    // So you need to handle that case that the page does not have the data yet. With blocking, the user will not see anything until the page was pre-generated,
+    // and the finished page will be served.
+    fallback: 'blocking',
     paths: meetups.map((meetup) => ({
       params: { meetupId: meetup._id.toString() },
     })),
