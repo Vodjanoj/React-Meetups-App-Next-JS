@@ -1,1 +1,1 @@
-# Working with NextJS
+# React Meetups App developed using Next JS
